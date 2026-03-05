@@ -252,7 +252,9 @@ Experimental configuration included:
 
 <div align="justify">
 
-The dataset used in this research is an existing benchmark dataset consisting of multivariate sensor measurements collected from embedded monitoring systems.
+The dataset consists of 43,776 training samples and 10,944 testing samples, each represented by 47 continuous telemetry features capturing device sensor measurements. The objective is to classify device behavior into Normal (0) or Fault (1) operational states.
+
+The dataset values appear to be pre-normalized sensor measurements, enabling efficient training of ensemble tree models without extensive preprocessing transformations.
 
 Dataset characteristics include:
 
