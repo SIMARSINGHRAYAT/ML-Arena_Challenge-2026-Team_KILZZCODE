@@ -10,9 +10,6 @@
 
 ![Graphical_Abstract](img/Graphical_Abstract)
 
-Figure GA: Graphical Abstract of the Proposed Framework
-
-Figure Brief:  
 The graphical abstract presents an overview of the proposed intelligent fault detection pipeline. It visually illustrates how multivariate sensor measurements are processed through preprocessing layers, statistical feature augmentation, ensemble learning modules, and prediction aggregation mechanisms to produce reliable fault classification outputs.
 
 ---
