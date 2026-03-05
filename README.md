@@ -41,7 +41,7 @@ A heterogeneous soft-voting ensemble composed of tree-based learning algorithms 
 
 </div>
 
-[Insert Figure 1 Here]
+![Figure_1_Research_Gap_Venn_Diagram](img/Figure_1_Research_Gap_Venn_Diagram)
 
 Figure 1: Research Gap Venn Diagram
 
@@ -165,7 +165,7 @@ The proposed framework follows a structured machine learning pipeline designed t
 
 ### 3.1 System Architecture
 
-[Insert Figure 2 Here]
+![Figure_2_Framework_Architecture](img/Figure_2_Framework_Architecture)
 
 Figure 2: Proposed Ensemble Framework Architecture
 
@@ -176,7 +176,7 @@ This diagram illustrates the overall architecture of the proposed system. Raw se
 
 ### 3.2 Layer Orchestration Diagram
 
-[Insert Figure 3 Here]
+![Figure_3_Layer_Orchestration](img/Figure_3_Layer_Orchestration)
 
 Figure 3: Layered Processing Architecture
 
@@ -187,7 +187,7 @@ The layer orchestration diagram presents the hierarchical structure of the machi
 
 ### 3.3 System Flowchart
 
-[Insert Figure 4 Here]
+![Figure_4_System_Flowchart](img/Figure_4_System_Flowchart)
 
 Figure 4: System Operational Flowchart
 
@@ -198,7 +198,7 @@ The flowchart describes the operational sequence of the framework from dataset i
 
 ### 3.4 Data Flow Diagram
 
-[Insert Figure 5 Here]
+![Figure_5_Data_Flow_Diagram](img/Figure_5_Data_Flow_Diagram)
 
 Figure 5: Data Flow Diagram of the Intelligent Monitoring Framework
 
@@ -209,7 +209,7 @@ The DFD illustrates how data moves between system components including preproces
 
 ### 3.5 Pipeline Workflow
 
-[Insert Figure 6 Here]
+![Figure_6_Pipeline_Workflow](img/Figure_6_Pipeline_Workflow)
 
 Figure 6: End-to-End Machine Learning Pipeline
 
@@ -224,7 +224,7 @@ This diagram summarizes the entire machine learning workflow including data inge
 
 </div>
 
-[Insert Figure 7 Here]
+![Figure_7_Experimental_Validation_Framework](img/Figure_7_Experimental_Validation_Framework)
 
 Figure 7: Experimental Validation Framework
 
@@ -291,7 +291,7 @@ Dataset characteristics include:
 
 ### Analytical Visualizations
 
-[Insert Figure 8 Here]
+![Figure_8_Performance_Bar_Chart](img/Figure_8_Performance_Bar_Chart)
 
 Figure 8: Performance Comparison Bar Chart
 
@@ -300,7 +300,7 @@ This bar chart compares the major performance evaluation metrics achieved by the
 
 ---
 
-[Insert Figure 9 Here]
+![Figure_9_Confusion_Matrix](img/Figure_9_Confusion_Matrix)
 
 Figure 9: Confusion Matrix Analysis
 
@@ -309,7 +309,7 @@ The confusion matrix visualizes classification outcomes, highlighting the number
 
 ---
 
-[Insert Figure 10 Here]
+![Figure_10_Class_Behavior_Analysis](img/Figure_10_Class_Behavior_Analysis)
 
 Figure 10: Class Behavior Analysis
 
