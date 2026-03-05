@@ -8,7 +8,7 @@
 
 </div>
 
-![Graphical_Abstract](img/Graphical_Abstract)
+![Graphical_Abstract](img/Graphical_Abstract.png)
 
 The graphical abstract presents an overview of the proposed intelligent fault detection pipeline. It visually illustrates how multivariate sensor measurements are processed through preprocessing layers, statistical feature augmentation, ensemble learning modules, and prediction aggregation mechanisms to produce reliable fault classification outputs.
 
