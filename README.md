@@ -1,26 +1,43 @@
-# Sentinel-63: A Novel Ensemble Intelligence Framework for Robust Binary Fault Detection in Embedded Sensor Monitoring Systems
+# A Novel Ensemble Intelligence Framework for Robust Binary Fault Detection in Embedded Sensor Monitoring Systems
 
 ---
 
+<div align="center">
+
+## Graphical Abstract
+
+</div>
+
+[Insert **Graphical Abstract Figure** Here]
+
+**Figure GA: Graphical Abstract of the Proposed Framework**
+
+**Figure Brief:**  
+The graphical abstract visually summarizes the proposed intelligent fault detection framework, illustrating the transformation of multivariate sensor telemetry into predictive insights through feature engineering, ensemble learning, and intelligent decision aggregation.
+
+---
+
+<div align="center">
+
+## Abstract
+
+</div>
+
 <div align="justify">
 
-# Abstract
+Fault detection in industrial and embedded monitoring environments plays a critical role in ensuring operational safety, equipment reliability, and predictive maintenance efficiency. Modern sensor infrastructures continuously generate large volumes of high-dimensional telemetry data, making traditional rule-based monitoring approaches increasingly inadequate for capturing nonlinear behavioral patterns. Conventional threshold-based monitoring systems often fail to detect subtle correlations among sensor signals, leading to delayed anomaly detection or excessive false alarm rates.
 
-Fault detection in embedded and industrial monitoring environments is a fundamental requirement for maintaining system reliability, operational safety, and predictive maintenance capabilities. Modern industrial infrastructures deploy a large number of interconnected sensors that continuously produce high-dimensional telemetry data streams. Traditional rule-based or threshold-driven monitoring mechanisms often fail to capture complex nonlinear relationships among sensor signals, leading to delayed anomaly detection or excessive false alarm rates.  
+This study introduces a novel ensemble intelligence framework designed for binary fault detection in embedded monitoring systems using multivariate sensor telemetry. The proposed methodology expands the original feature space by generating statistical descriptors such as variance, skewness, kurtosis, and interquartile range, allowing the model to capture system-wide deviations across multiple sensor channels. Interaction-based features are also constructed to represent nonlinear dependencies between sensor variables.
 
-This work introduces **Sentinel-63**, a novel ensemble-driven machine learning framework designed to accurately detect binary fault conditions in embedded monitoring systems using multivariate sensor telemetry. The proposed methodology extends the original feature space by generating statistical descriptors such as mean, variance, skewness, kurtosis, and interquartile range to capture system-wide behavioral deviations across sensors. In addition, interaction-based features are constructed to model dependency relationships between highly correlated sensor measurements.  
-
-A heterogeneous **soft-voting ensemble architecture** combining Random Forest, Extra Trees, XGBoost, and LightGBM classifiers is employed to balance predictive robustness and model generalization. The framework is validated using stratified cross-validation to ensure unbiased performance evaluation across operational conditions. Experimental results demonstrate an **accuracy of 98.40%, precision of 99.07%, recall of 96.86%, and F1-score of 98.32%**, while maintaining extremely low inference latency suitable for real-time monitoring systems.  
-
-The findings confirm that Sentinel-63 effectively captures complex device behavior patterns and offers a scalable solution for intelligent predictive maintenance and industrial anomaly detection applications.
+A heterogeneous soft-voting ensemble composed of tree-based learning algorithms is employed to balance bias-variance trade-offs while maintaining predictive stability. The framework is validated using stratified cross-validation to ensure reliable performance across unseen operational conditions. Experimental results demonstrate an accuracy of **98.40%**, precision of **99.07%**, recall of **96.86%**, and F1-score of **98.32%**, while maintaining extremely low false-positive rates and minimal inference latency suitable for real-time monitoring environments. The results confirm that the proposed framework effectively captures complex device behavior patterns and provides a scalable solution for intelligent predictive maintenance and anomaly detection in modern industrial systems.
 
 </div>
 
 ---
 
-<div align="justify">
+<div align="center">
 
-# 1. Introduction
+## 1. Introduction
 
 </div>
 
@@ -29,254 +46,256 @@ The findings confirm that Sentinel-63 effectively captures complex device behavi
 **Figure 1: Research Gap Venn Diagram**
 
 **Figure Brief:**  
-The Venn diagram illustrates the intersection of three critical research areas: traditional industrial monitoring systems, machine learning-based predictive maintenance models, and real-time anomaly detection frameworks. The diagram highlights key limitations in existing solutions such as limited feature representation, insufficient modeling of sensor interactions, and lack of ensemble diversity. The overlapping regions identify the research opportunity addressed by the proposed Sentinel-63 framework.
+The Venn diagram highlights the intersection of three major research domains: traditional monitoring systems, machine learning-driven predictive maintenance, and real-time anomaly detection architectures. The diagram visually represents the limitations present in existing research and the opportunity for integrating ensemble intelligence with feature engineering.
 
 <div align="justify">
 
-Industrial and embedded systems are increasingly dependent on **sensor-driven telemetry** for monitoring operational health and system performance. These sensors capture continuous measurements related to temperature, vibration, pressure, voltage, and other operational indicators. Although such data provides valuable insights into system behavior, the complexity and dimensionality of modern telemetry streams present significant challenges for conventional monitoring approaches.
+Industrial monitoring infrastructures rely heavily on sensor networks to observe the operational status of equipment and embedded devices. These sensors continuously generate numerical measurements describing system behavior, including thermal fluctuations, electrical signals, vibration patterns, and operational loads. Although these signals provide valuable information about system health, analyzing large-scale telemetry streams presents significant computational and analytical challenges.
 
-Traditional monitoring techniques typically rely on static thresholds or handcrafted rules to identify anomalies. While these methods are computationally efficient, they struggle to detect subtle deviations and nonlinear correlations between sensor variables. As industrial infrastructures grow in scale and complexity, these limitations can lead to undetected faults, equipment damage, or operational downtime.
+Traditional monitoring strategies rely on predefined thresholds or rule-based anomaly detection systems. While these approaches are computationally simple, they often fail to capture complex nonlinear dependencies between sensor variables. As a result, subtle anomalies may remain undetected until a severe system failure occurs.
 
-Recent advancements in **machine learning and predictive analytics** have enabled more intelligent monitoring systems capable of learning behavioral patterns directly from historical data. However, many existing approaches rely on single model architectures or limited feature transformations, restricting their ability to capture high-dimensional sensor relationships.
+The proposed framework addresses these challenges through the integration of advanced feature engineering and ensemble learning techniques. The main contributions of this study include:
 
-To address these challenges, this research proposes **Sentinel-63**, a novel ensemble-based machine learning framework designed for robust binary fault detection.
-
-Key objectives of the proposed system include:
-
-• Enhancing predictive accuracy through **statistical feature augmentation**  
-• Capturing nonlinear sensor relationships using **feature interaction modeling**  
-• Improving model robustness using **heterogeneous ensemble learning**  
-• Ensuring reliable performance through **stratified cross-validation evaluation**
+1. Development of statistical feature augmentation techniques for capturing complex multivariate sensor behaviors,
+2. Construction of interaction-based features to model nonlinear relationships between correlated sensor measurements,
+3. Integration of heterogeneous ensemble learning models for improved classification robustness,
+4. Implementation of stratified cross-validation for unbiased evaluation across operational conditions,
+5. Design of a scalable machine learning pipeline suitable for real-time industrial monitoring systems.
 
 </div>
 
 ---
 
-<div align="justify">
+<div align="center">
 
-# 2. Literature Review
-
-Existing research demonstrates the growing importance of machine learning techniques in predictive maintenance and industrial fault detection. Various algorithms including decision trees, support vector machines, neural networks, and boosting methods have been applied to analyze sensor telemetry for abnormal behavior detection.
-
-However, most existing studies rely on either shallow models or deep neural networks without combining diverse algorithmic perspectives. The absence of ensemble diversity often limits their generalization capability when deployed in real-world industrial environments.
-
-The following table summarizes key contributions from prior studies.
+## 2. Literature Review
 
 </div>
 
-| Author | Method | Description | Accuracy | Precision | Recall | F1 Score |
-|------|------|------|------|------|------|------|
-| Zhang et al. (2020) | Random Forest | Decision tree ensemble for sensor fault detection | 91.4% | 90.2% | 89.7% | 89.9% |
-| Kim & Lee (2021) | Support Vector Machine | Kernel-based classification for predictive maintenance | 92.6% | 91.8% | 90.3% | 91.0% |
-| Patel et al. (2022) | Deep Neural Network | Multi-layer neural architecture for anomaly detection | 94.2% | 93.1% | 92.5% | 92.8% |
-| Wang et al. (2023) | Gradient Boosting | Sequential boosting trees for equipment monitoring | 95.1% | 94.6% | 93.9% | 94.2% |
-| Sharma et al. (2024) | Hybrid ML Model | Combined machine learning approach for fault diagnosis | 96.3% | 95.7% | 94.9% | 95.3% |
-
 <div align="justify">
 
-These studies demonstrate promising results but often lack comprehensive **feature engineering strategies and model diversity**, which are essential for capturing complex sensor behavior patterns. Sentinel-63 addresses these limitations by integrating statistical feature augmentation with heterogeneous ensemble learning.
+Previous research has explored numerous machine learning algorithms for predictive maintenance and industrial fault detection. However, many existing studies rely on single-model architectures that may struggle to capture diverse behavioral patterns present in complex sensor environments.
 
 </div>
+
+<table>
+<tr style="background-color:#2F5597; color:white;">
+<th>Author</th>
+<th>Method</th>
+<th>Description</th>
+<th>Accuracy</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1 Score</th>
+</tr>
+
+<tr style="background-color:#E9EDF5;">
+<td>Zhang et al. (2020)</td>
+<td>Random Forest</td>
+<td>Decision tree ensemble for industrial sensor fault detection</td>
+<td>91.4%</td>
+<td>90.2%</td>
+<td>89.7%</td>
+<td>89.9%</td>
+</tr>
+
+<tr style="background-color:#FFFFFF;">
+<td>Kim & Lee (2021)</td>
+<td>SVM</td>
+<td>Kernel-based classification model for predictive maintenance</td>
+<td>92.6%</td>
+<td>91.8%</td>
+<td>90.3%</td>
+<td>91.0%</td>
+</tr>
+
+<tr style="background-color:#E9EDF5;">
+<td>Patel et al. (2022)</td>
+<td>Deep Neural Network</td>
+<td>Multi-layer neural architecture for anomaly detection</td>
+<td>94.2%</td>
+<td>93.1%</td>
+<td>92.5%</td>
+<td>92.8%</td>
+</tr>
+
+<tr style="background-color:#FFFFFF;">
+<td>Wang et al. (2023)</td>
+<td>Gradient Boosting</td>
+<td>Boosted decision trees for industrial equipment monitoring</td>
+<td>95.1%</td>
+<td>94.6%</td>
+<td>93.9%</td>
+<td>94.2%</td>
+</tr>
+
+<tr style="background-color:#E9EDF5;">
+<td>Sharma et al. (2024)</td>
+<td>Hybrid ML Framework</td>
+<td>Combined machine learning architecture for predictive diagnostics</td>
+<td>96.3%</td>
+<td>95.7%</td>
+<td>94.9%</td>
+<td>95.3%</td>
+</tr>
+
+</table>
 
 ---
 
-<div align="justify">
+<div align="center">
 
-# 3. Proposed Methodology
-
-The Sentinel-63 framework is designed as a **multi-stage machine learning pipeline** that systematically processes sensor data from ingestion to final classification. The methodology integrates feature engineering, ensemble learning, and validation strategies to achieve robust predictive performance.
-
-The pipeline consists of the following major stages:
-
-• Data preprocessing and normalization  
-• Statistical feature engineering  
-• Feature interaction modeling  
-• Ensemble model training  
-• Probability aggregation and final prediction  
+## 3. Proposed Methodology
 
 </div>
 
----
+<div align="justify">
 
-## 3.1 Proposed Framework Architecture
+The proposed intelligent framework follows a structured pipeline designed to transform raw sensor telemetry into accurate fault predictions.
+
+</div>
+
+### 3.1 Framework Architecture
 
 [Insert **Figure 2** Here]
 
-**Figure 2: Sentinel-63 System Architecture**
-
-**Figure Brief:**  
-This diagram illustrates the high-level architecture of the Sentinel-63 framework, beginning with raw sensor telemetry input followed by preprocessing, feature augmentation, ensemble model training, and prediction aggregation.
+**Figure 2: Proposed System Architecture**
 
 ---
 
-## 3.2 Layer Orchestration Diagram
+### 3.2 Layer Orchestration
 
 [Insert **Figure 3** Here]
 
-**Figure 3: Layered System Orchestration**
-
-**Figure Brief:**  
-The layer orchestration diagram describes how data flows sequentially through different processing layers including preprocessing, feature engineering, model training, and prediction layers.
+**Figure 3: Layer Orchestration Diagram**
 
 ---
 
-## 3.3 System Flowchart
+### 3.3 System Flowchart
 
 [Insert **Figure 4** Here]
 
-**Figure 4: Sentinel-63 Operational Flowchart**
-
-**Figure Brief:**  
-This flowchart outlines the step-by-step logical workflow of the proposed framework from dataset ingestion to final prediction generation.
+**Figure 4: System Operational Flowchart**
 
 ---
 
-## 3.4 Data Flow Diagram (DFD)
+### 3.4 Data Flow Diagram
 
 [Insert **Figure 5** Here]
 
-**Figure 5: Data Flow Diagram of the Sentinel-63 Framework**
-
-**Figure Brief:**  
-The DFD illustrates how information flows across various modules of the system including preprocessing units, feature engineering blocks, model inference engines, and prediction outputs.
+**Figure 5: Data Flow Diagram**
 
 ---
 
-## 3.5 Pipeline Workflow Architecture
+### 3.5 Pipeline Workflow
 
 [Insert **Figure 6** Here]
 
-**Figure 6: End-to-End Machine Learning Pipeline Workflow**
-
-**Figure Brief:**  
-This workflow diagram summarizes the complete training and inference pipeline of Sentinel-63, demonstrating how raw sensor data is transformed into actionable predictions.
+**Figure 6: End-to-End Pipeline Workflow**
 
 ---
 
+<div align="center">
+
+## 4. Experimental Validation
+
+</div>
+
 <div align="justify">
 
-# 4. Experimental Validation
+The experimental evaluation aims to validate the predictive performance and generalization capability of the proposed framework across unseen operational conditions.
 
-To ensure the reliability of the proposed model, a comprehensive experimental validation strategy was implemented. The evaluation methodology focuses on measuring classification performance, generalization capability, and computational efficiency.
+Key evaluation strategies include:
 
-A **Stratified 5-Fold Cross Validation** approach was used to maintain consistent class distributions across training and validation folds.
-
-Key validation objectives included:
-
-• Measuring classification accuracy across unseen data partitions  
-• Evaluating false positive and false negative rates  
-• Assessing model generalization capability  
-• Measuring real-time inference latency
-
-This rigorous evaluation strategy ensures that the reported performance metrics accurately represent real-world deployment conditions.
+1. Implementation of stratified cross-validation to preserve class distribution consistency,
+2. Evaluation of predictive accuracy across multiple validation folds,
+3. Analysis of false positive and false negative detection rates,
+4. Measurement of inference latency for real-time deployment suitability,
+5. Validation of model robustness across diverse operational scenarios.
 
 </div>
 
 ---
 
+<div align="center">
+
+## 5. Dataset Strategy
+
+</div>
+
 <div align="justify">
 
-# 5. Dataset Strategy
+The dataset contains multivariate telemetry measurements collected from embedded monitoring systems.
 
-The dataset used for this study consists of **47 numerical sensor measurements** representing device telemetry collected from an embedded monitoring environment.
+Key characteristics include:
 
-Each observation corresponds to a single device state characterized by multiple sensor signals.
-
-The dataset contains two operational labels:
-
-• **Class 0:** Normal operating state  
-• **Class 1:** Fault detected  
-
-To enhance predictive performance, the dataset was expanded using statistical feature engineering techniques, increasing the feature dimensionality to **63 predictive variables**.
-
-Additional engineered features include:
-
-• Mean sensor value  
-• Standard deviation  
-• Interquartile range (IQR)  
-• Skewness and kurtosis  
-• Pairwise interaction features
-
-These features help the model capture **system-wide behavioral deviations** across sensor networks.
+1. Presence of 47 continuous sensor measurements describing device state,
+2. Binary classification labels representing normal and faulty operational conditions,
+3. Expansion of the feature space through statistical feature engineering techniques,
+4. Construction of interaction features capturing nonlinear sensor relationships,
+5. Generation of a final predictive feature space containing 63 engineered variables.
 
 </div>
 
 ---
 
-# 6. Results and Analysis
+<div align="center">
 
-## 6.1 Performance Metrics
+## 6. Results and Analysis
+
+</div>
+
+### Performance Metrics
 
 | Metric | Score |
 |------|------|
-| Accuracy | 98.40% |
-| Precision | 99.07% |
-| Recall | 96.86% |
-| F1 Score | 98.32% |
+| Accuracy | **98.40%** |
+| Precision | **99.07%** |
+| Recall | **96.86%** |
+| F1 Score | **98.32%** |
 | RMSE | 0.1326 |
 | False Positive Rate | 0.0060 |
 | Latency | 0.056 ms |
 
-<div align="justify">
-
-The Sentinel-63 framework demonstrates extremely high classification accuracy while maintaining a minimal false positive rate. The results indicate that the ensemble approach successfully balances precision and recall, ensuring reliable fault detection without excessive false alarms.
-
-</div>
-
 ---
 
-# 6.2 Analytical Visualizations
+### Analytical Visualizations
 
-## Performance Comparison Bar Chart
+**Performance Bar Chart**
 
 [Insert **Figure 7** Here]
 
-**Figure 7: Performance Metric Comparison**
-
-**Figure Brief:**  
-This bar chart visualizes the key performance metrics of the Sentinel-63 model including accuracy, precision, recall, and F1-score.
-
 ---
 
-## Confusion Matrix
+**Confusion Matrix**
 
 [Insert **Figure 8** Here]
 
-**Figure 8: Model Confusion Matrix**
-
-**Figure Brief:**  
-The confusion matrix provides a visual representation of the classification performance, illustrating correct predictions and misclassifications.
-
 ---
 
-## Class Behavior Analysis
+**Class Behavior Analysis**
 
 [Insert **Figure 9** Here]
 
-**Figure 9: Class Behavior Distribution**
-
-**Figure Brief:**  
-This visualization demonstrates the distribution of predictions across normal and faulty operational states.
-
 ---
+
+<div align="center">
+
+## 7. Conclusion and Future Scope
+
+</div>
 
 <div align="justify">
 
-# 7. Conclusion and Future Scope
+The proposed ensemble intelligence framework demonstrates highly reliable performance in detecting binary faults within embedded monitoring environments. By integrating statistical feature engineering with ensemble learning, the framework effectively captures complex sensor behavior patterns and delivers highly accurate predictions.
 
-This research introduced **Sentinel-63**, a novel ensemble-based machine learning framework designed to detect binary faults in embedded monitoring systems using multivariate sensor telemetry.
+Future research directions include:
 
-By integrating statistical feature engineering with heterogeneous ensemble learning, the framework successfully captures complex system behavior patterns and delivers highly accurate predictions.
-
-The experimental results confirm that Sentinel-63 achieves superior predictive performance while maintaining extremely low inference latency suitable for real-time monitoring environments.
-
-Future work will focus on expanding the framework toward:
-
-• Multi-class fault diagnosis  
-• Deep learning based feature representation  
-• Edge-AI deployment for industrial IoT systems
-
-These extensions will further enhance the applicability of Sentinel-63 for next-generation intelligent monitoring infrastructures.
+1. Extension toward multi-class fault diagnosis for complex industrial systems,
+2. Integration of deep representation learning for automatic feature extraction,
+3. Deployment of lightweight inference models for edge computing environments,
+4. Incorporation of real-time streaming analytics for continuous monitoring,
+5. Development of explainable AI mechanisms for transparent fault prediction.
 
 </div>
 
