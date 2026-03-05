@@ -8,7 +8,7 @@
 
 </div>
 
-[Insert Graphical Abstract Figure Here]
+![Graphical_Abstract](img/Graphical_Abstract)
 
 Figure GA: Graphical Abstract of the Proposed Framework
 
