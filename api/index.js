@@ -36,7 +36,7 @@ module.exports = async function handler(req, res) {
 
   try {
     // Audio streaming handler (handles HTTP Range and proxying audio)
-    if (pathname === '/api/music/stream' || pathname.endsWith('/stream')) {
+    if (pathname === '/api/music/stream') {
       req.query = req.query || Object.fromEntries(url.searchParams.entries());
       return await engine.handleStream(req, res);
     }
@@ -54,19 +54,22 @@ module.exports = async function handler(req, res) {
 
     if (pathname === '/api/debug/stream') {
       const id = url.searchParams.get('id') || 'BSTsnWoslP4';
-      const yt = await require('../server/bytune-engine-bundle').getYT?.() || null;
-      // In bytune-engine-bundle, let's test getBasicInfo on all clients
+      const ytBundle = require('../server/bytune-engine-bundle');
+      const yt = await ytBundle.getYT?.();
       const results = {};
       const clients = ["ANDROID", "IOS", "VISIONOS", "WEB", "YTMUSIC", "TV"];
       for (const c of clients) {
         try {
           const info = await yt.getBasicInfo(id, { client: c });
           const sd = info?.streaming_data;
+          const formats = sd?.adaptive_formats || [];
+          const audioFormats = formats.filter(f => f.has_audio);
           results[c] = {
             status: info?.playability_status?.status,
             reason: info?.playability_status?.reason,
-            formats: (sd?.adaptive_formats || []).length,
-            hasAudio: (sd?.adaptive_formats || []).some(f => f.has_audio),
+            formats: formats.length,
+            audioFormats: audioFormats.length,
+            sampleUrl: audioFormats[0]?.url ? 'DIRECT_URL' : (audioFormats[0]?.cipher || audioFormats[0]?.signature_cipher ? 'CIPHER' : 'NONE'),
           };
         } catch (e) {
           results[c] = { error: e.message };
