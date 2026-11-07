@@ -144,29 +144,61 @@
       try {
         const history = JSON.parse(localStorage.getItem('bytune_history') || '[]');
         let totalMs = 0;
-        const songCounts = new Map();
+        let plays = 0;
+        const trackMap = new Map();
+        const artistMap = new Map();
+        const albumMap = new Map();
 
         for (const entry of history) {
           totalMs += entry.deltaMs || 0;
-          if (entry.track?.id) {
-            const current = songCounts.get(entry.track.id) || { count: 0, track: entry.track };
-            current.count++;
-            songCounts.set(entry.track.id, current);
+          plays += 1;
+          const tr = entry.track;
+          if (tr) {
+            const trackId = tr.id || tr.title;
+            const curTr = trackMap.get(trackId) || { ...tr, ms: 0, plays: 0 };
+            curTr.ms += entry.deltaMs || 0;
+            curTr.plays += 1;
+            trackMap.set(trackId, curTr);
+
+            if (tr.artist && tr.artist !== 'Unknown artist') {
+              const curArt = artistMap.get(tr.artist) || { name: tr.artist, ms: 0, plays: 0 };
+              curArt.ms += entry.deltaMs || 0;
+              curArt.plays += 1;
+              artistMap.set(tr.artist, curArt);
+            }
+
+            if (tr.album) {
+              const curAlb = albumMap.get(tr.album) || { name: tr.album, artist: tr.artist, ms: 0, plays: 0 };
+              curAlb.ms += entry.deltaMs || 0;
+              curAlb.plays += 1;
+              albumMap.set(tr.album, curAlb);
+            }
           }
         }
 
-        const topTracks = Array.from(songCounts.values())
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 10)
-          .map((x) => x.track);
-
         return {
-          totalSeconds: Math.round(totalMs / 1000),
-          topTracks,
+          totalMs,
+          plays,
+          tracks: Array.from(trackMap.values()).sort((a, b) => b.ms - a.ms).slice(0, 50),
+          artists: Array.from(artistMap.values()).sort((a, b) => b.ms - a.ms).slice(0, 50),
+          albums: Array.from(albumMap.values()).sort((a, b) => b.ms - a.ms).slice(0, 50),
+          hours: new Array(24).fill(0),
+          days: [],
           period,
+          months: [],
         };
       } catch {
-        return { totalSeconds: 0, topTracks: [], period };
+        return {
+          totalMs: 0,
+          plays: 0,
+          tracks: [],
+          artists: [],
+          albums: [],
+          hours: new Array(24).fill(0),
+          days: [],
+          period,
+          months: [],
+        };
       }
     },
 
