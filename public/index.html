@@ -6,7 +6,7 @@
     <meta name="referrer" content="no-referrer" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; media-src * blob: data: https: http:; img-src * data: blob: https:; font-src * data:; connect-src *;"
+      content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com; frame-src * https://www.youtube.com https://www.youtube-nocookie.com; media-src * blob: data: https: http:; img-src * data: blob: https:; font-src * data:; connect-src *;"
     />
     <title>ByTune — Web Music Player</title>
     <link rel="icon" type="image/png" href="/icon.png" />
@@ -30,7 +30,19 @@
         width: 100%;
         height: 100%;
       }
+      #bytune-yt-player-container {
+        position: fixed;
+        left: -9999px;
+        bottom: -9999px;
+        width: 200px;
+        height: 200px;
+        opacity: 0.001;
+        pointer-events: none;
+        z-index: -9999;
+      }
     </style>
+    <!-- YouTube IFrame API for high-fidelity direct browser streaming -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     <!-- ByTune Web Bridge to provide window.bytune to the client -->
     <script src="/bytune-web-bridge.js"></script>
     <script type="module" crossorigin src="/assets/index-Bz9PNNZf.js"></script>

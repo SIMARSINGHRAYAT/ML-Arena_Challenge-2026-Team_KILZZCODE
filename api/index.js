@@ -88,16 +88,19 @@ module.exports = async function handler(req, res) {
     }
 
     if (pathname === '/api/music/home') {
+      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
       const data = await engine.getHome();
       return sendJson(data);
     }
 
     if (pathname === '/api/music/charts') {
+      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
       const data = await engine.getCharts();
       return sendJson(data);
     }
 
     if (pathname === '/api/music/moods') {
+      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
       const data = await engine.getMoods();
       return sendJson(data);
     }
@@ -124,6 +127,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (pathname === '/api/music/suggestions') {
+      res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=1800');
       const query = url.searchParams.get('query') || '';
       const data = await engine.suggestions(query);
       return sendJson(data || { items: [] });
@@ -159,6 +163,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (pathname === '/api/music/lyrics') {
+      res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400');
       let meta = {};
       if (req.method === 'POST') {
         meta = await parseBody(req);
@@ -191,16 +196,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (pathname === '/api/music/enrich') {
-      let ids = [];
-      if (req.method === 'POST') {
-        const body = await parseBody(req);
-        ids = body.ids || [];
-      } else {
-        const rawIds = url.searchParams.get('ids') || '';
-        ids = rawIds.split(',').filter(Boolean);
-      }
-      const data = await engine.enrichDurations(ids);
-      return sendJson(data);
+      return sendJson({});
     }
 
     // Default 404 for unknown API route

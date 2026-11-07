@@ -69893,7 +69893,7 @@ async function withRetry(fn, attempts = 2, delayMs = 600) {
 async function createSession() {
   const market = resolveDeviceMarket();
   const yt = await Innertube.create({
-    retrieve_player: true,
+    retrieve_player: false,
     enable_session_cache: false,
     location: market.country,
     lang: displayLanguage()
@@ -70412,31 +70412,7 @@ async function getLyrics(meta2) {
 }
 var durationCache = /* @__PURE__ */ new Map();
 async function enrichDurations(ids) {
-  const result = {};
-  const pending = [...new Set(ids.filter((id2) => id2 && !durationCache.has(id2)))].slice(0, 60);
-  let cursor = 0;
-  const worker = async () => {
-    while (cursor < pending.length) {
-      const id2 = pending[cursor++];
-      try {
-        const yt = await getYT();
-        const info2 = await yt.getBasicInfo(id2, { client: "VISIONOS" });
-        const secs = Math.round(info2?.basic_info?.duration ?? 0);
-        if (secs > 0) {
-          durationCache.set(id2, secs);
-          evictOldest(durationCache, DURATION_CACHE_MAX);
-          result[id2] = secs;
-        }
-      } catch {
-      }
-    }
-  };
-  await Promise.all(Array.from({ length: Math.min(4, pending.length) }, worker));
-  for (const id2 of ids) {
-    const cached2 = durationCache.get(id2);
-    if (cached2) result[id2] = cached2;
-  }
-  return result;
+  return {};
 }
 async function probeUrl(url) {
   try {

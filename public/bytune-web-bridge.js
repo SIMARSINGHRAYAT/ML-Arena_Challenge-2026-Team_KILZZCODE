@@ -41,6 +41,414 @@
     }
   }
 
+  // --- High-Fidelity YouTube Audio Bridge ---
+  let ytApiReady = false;
+  const pendingYTInits = [];
+
+  function ensureYTReady(cb) {
+    if (ytApiReady) {
+      cb();
+    } else {
+      pendingYTInits.push(cb);
+    }
+  }
+
+  // Hook into YouTube IFrame API callback
+  const prevOnYouTubeReady = window.onYouTubeIframeAPIReady;
+  window.onYouTubeIframeAPIReady = function () {
+    if (typeof prevOnYouTubeReady === 'function') {
+      try { prevOnYouTubeReady(); } catch {}
+    }
+    ytApiReady = true;
+    for (const fn of pendingYTInits) {
+      try { fn(); } catch (err) { console.warn('[bytune-audio] init error:', err); }
+    }
+    pendingYTInits.length = 0;
+  };
+
+  if (window.YT && window.YT.Player) {
+    ytApiReady = true;
+  }
+
+  function getPlayerContainer() {
+    let container = document.getElementById('bytune-yt-player-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'bytune-yt-player-container';
+      container.style.cssText = 'position:fixed;left:-9999px;bottom:-9999px;width:200px;height:200px;opacity:0.001;pointer-events:none;z-index:-9999;';
+      (document.body || document.documentElement).appendChild(container);
+    }
+    return container;
+  }
+
+  function extractVideoId(url) {
+    if (!url || typeof url !== 'string') return null;
+    const m1 = url.match(/[?&]id=([a-zA-Z0-9_-]{11})/);
+    if (m1) return m1[1];
+    const m2 = url.match(/\/([a-zA-Z0-9_-]{11})(?:[?#]|$)/);
+    if (m2) return m2[1];
+    if (url.length === 11 && /^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+    return null;
+  }
+
+  let audioCounter = 0;
+  const OrigAudio = window.Audio;
+
+  class AudioBridge extends EventTarget {
+    constructor(initialSrc) {
+      super();
+      this._id = ++audioCounter;
+      this._slotId = 'bytune-yt-slot-' + this._id;
+      this._src = '';
+      this._videoId = null;
+      this._paused = true;
+      this._ended = false;
+      this._currentTime = 0;
+      this._duration = 0;
+      this._volume = 1;
+      this._muted = false;
+      this._preload = 'auto';
+      this._playbackRate = 1;
+      this._playerReady = false;
+      this._ytPlayer = null;
+      this._pendingVideoId = null;
+      this._pendingPlay = false;
+      this._pendingSeek = null;
+      this._timeUpdateInterval = null;
+      this._nativeAudio = new OrigAudio();
+
+      const nativeEvents = ['timeupdate', 'progress', 'waiting', 'canplay', 'playing', 'pause', 'ended', 'error', 'volumechange', 'durationchange'];
+      for (const ev of nativeEvents) {
+        this._nativeAudio.addEventListener(ev, () => {
+          if (!this._videoId) {
+            this.dispatchEvent(new Event(ev));
+          }
+        });
+      }
+
+      this._initSlot();
+      if (initialSrc) {
+        this.src = initialSrc;
+      }
+    }
+
+    _initSlot() {
+      const setup = () => {
+        const container = getPlayerContainer();
+        const slot = document.createElement('div');
+        slot.id = this._slotId;
+        container.appendChild(slot);
+
+        ensureYTReady(() => {
+          try {
+            this._ytPlayer = new window.YT.Player(this._slotId, {
+              width: '200',
+              height: '200',
+              playerVars: {
+                autoplay: 0,
+                controls: 0,
+                disablekb: 1,
+                fs: 0,
+                modestbranding: 1,
+                rel: 0,
+                playsinline: 1,
+                enablejsapi: 1,
+                origin: window.location.origin
+              },
+              events: {
+                onReady: () => {
+                  this._playerReady = true;
+                  if (this._volume !== 1) this._ytPlayer.setVolume(Math.round(this._volume * 100));
+                  if (this._muted) this._ytPlayer.mute();
+                  if (this._pendingVideoId) {
+                    const vid = this._pendingVideoId;
+                    const shouldPlay = this._pendingPlay;
+                    const seek = this._pendingSeek || 0;
+                    this._pendingVideoId = null;
+                    this._pendingPlay = false;
+                    this._pendingSeek = null;
+                    if (shouldPlay) {
+                      this._ytPlayer.loadVideoById(vid, seek);
+                    } else {
+                      this._ytPlayer.cueVideoById(vid, seek);
+                    }
+                  }
+                },
+                onStateChange: (event) => {
+                  const state = event.data;
+                  if (state === window.YT.PlayerState.PLAYING) {
+                    this._paused = false;
+                    this._ended = false;
+                    this._startTimeUpdates();
+                    this.dispatchEvent(new Event('playing'));
+                    this.dispatchEvent(new Event('canplay'));
+                  } else if (state === window.YT.PlayerState.PAUSED) {
+                    this._paused = true;
+                    this._stopTimeUpdates();
+                    this.dispatchEvent(new Event('pause'));
+                  } else if (state === window.YT.PlayerState.BUFFERING) {
+                    this.dispatchEvent(new Event('waiting'));
+                  } else if (state === window.YT.PlayerState.ENDED) {
+                    this._paused = true;
+                    this._ended = true;
+                    this._stopTimeUpdates();
+                    this.dispatchEvent(new Event('ended'));
+                  } else if (state === window.YT.PlayerState.CUED) {
+                    this.dispatchEvent(new Event('canplay'));
+                  }
+                },
+                onError: (event) => {
+                  console.warn('[bytune-audio] YouTube playback error:', event.data);
+                  this.dispatchEvent(new Event('error'));
+                }
+              }
+            });
+          } catch (err) {
+            console.warn('[bytune-audio] YT Player creation failed:', err);
+          }
+        });
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setup, { once: true });
+      } else {
+        setup();
+      }
+    }
+
+    _startTimeUpdates() {
+      this._stopTimeUpdates();
+      this._timeUpdateInterval = setInterval(() => {
+        if (this._playerReady && this._ytPlayer && typeof this._ytPlayer.getCurrentTime === 'function') {
+          try {
+            const cur = this._ytPlayer.getCurrentTime();
+            if (typeof cur === 'number' && !isNaN(cur)) {
+              this._currentTime = cur;
+            }
+          } catch {}
+        }
+        this.dispatchEvent(new Event('timeupdate'));
+        this.dispatchEvent(new Event('progress'));
+      }, 200);
+    }
+
+    _stopTimeUpdates() {
+      if (this._timeUpdateInterval) {
+        clearInterval(this._timeUpdateInterval);
+        this._timeUpdateInterval = null;
+      }
+    }
+
+    get src() {
+      return this._src;
+    }
+
+    set src(url) {
+      this._src = String(url || '');
+      const vid = extractVideoId(this._src);
+      if (vid) {
+        this._videoId = vid;
+        this._ended = false;
+        this._currentTime = 0;
+        if (this._playerReady && this._ytPlayer && typeof this._ytPlayer.loadVideoById === 'function') {
+          if (!this._paused || this._pendingPlay) {
+            this._ytPlayer.loadVideoById(vid, 0);
+            this._pendingPlay = false;
+          } else {
+            this._ytPlayer.cueVideoById(vid, 0);
+          }
+        } else {
+          this._pendingVideoId = vid;
+        }
+      } else {
+        this._videoId = null;
+        this._nativeAudio.src = this._src;
+      }
+    }
+
+    play() {
+      if (this._videoId) {
+        this._paused = false;
+        this._ended = false;
+        if (this._playerReady && this._ytPlayer && typeof this._ytPlayer.playVideo === 'function') {
+          const curVid = (this._ytPlayer.getVideoData && this._ytPlayer.getVideoData().video_id) || null;
+          if (curVid !== this._videoId) {
+            this._ytPlayer.loadVideoById(this._videoId, this._currentTime || 0);
+          } else {
+            this._ytPlayer.playVideo();
+          }
+          this._startTimeUpdates();
+        } else {
+          this._pendingPlay = true;
+        }
+        this.dispatchEvent(new Event('play'));
+        return Promise.resolve();
+      }
+      return this._nativeAudio.play();
+    }
+
+    pause() {
+      if (this._videoId) {
+        this._paused = true;
+        this._pendingPlay = false;
+        if (this._playerReady && this._ytPlayer && typeof this._ytPlayer.pauseVideo === 'function') {
+          this._ytPlayer.pauseVideo();
+        }
+        this._stopTimeUpdates();
+        this.dispatchEvent(new Event('pause'));
+        return;
+      }
+      this._nativeAudio.pause();
+    }
+
+    load() {
+      if (!this._videoId) {
+        this._nativeAudio.load();
+      }
+    }
+
+    get currentTime() {
+      if (this._videoId) {
+        if (this._playerReady && this._ytPlayer && typeof this._ytPlayer.getCurrentTime === 'function') {
+          try {
+            const t = this._ytPlayer.getCurrentTime();
+            if (typeof t === 'number' && !isNaN(t)) {
+              this._currentTime = t;
+              return t;
+            }
+          } catch {}
+        }
+        return this._currentTime || 0;
+      }
+      return this._nativeAudio.currentTime;
+    }
+
+    set currentTime(val) {
+      const t = Math.max(0, Number(val) || 0);
+      this._currentTime = t;
+      if (this._videoId) {
+        if (this._playerReady && this._ytPlayer && typeof this._ytPlayer.seekTo === 'function') {
+          this._ytPlayer.seekTo(t, true);
+        } else {
+          this._pendingSeek = t;
+        }
+        this.dispatchEvent(new Event('timeupdate'));
+        return;
+      }
+      this._nativeAudio.currentTime = t;
+    }
+
+    get duration() {
+      if (this._videoId) {
+        if (this._playerReady && this._ytPlayer && typeof this._ytPlayer.getDuration === 'function') {
+          try {
+            const d = this._ytPlayer.getDuration();
+            if (typeof d === 'number' && d > 0) {
+              this._duration = d;
+              return d;
+            }
+          } catch {}
+        }
+        return this._duration || 0;
+      }
+      return this._nativeAudio.duration;
+    }
+
+    get volume() {
+      return this._volume;
+    }
+
+    set volume(val) {
+      const v = Math.max(0, Math.min(1, Number(val) || 0));
+      this._volume = v;
+      if (this._videoId && this._playerReady && this._ytPlayer && typeof this._ytPlayer.setVolume === 'function') {
+        this._ytPlayer.setVolume(Math.round(v * 100));
+      }
+      this._nativeAudio.volume = v;
+      this.dispatchEvent(new Event('volumechange'));
+    }
+
+    get muted() {
+      return this._muted;
+    }
+
+    set muted(val) {
+      const m = Boolean(val);
+      this._muted = m;
+      if (this._videoId && this._playerReady && this._ytPlayer) {
+        if (m && typeof this._ytPlayer.mute === 'function') this._ytPlayer.mute();
+        else if (!m && typeof this._ytPlayer.unMute === 'function') this._ytPlayer.unMute();
+      }
+      this._nativeAudio.muted = m;
+      this.dispatchEvent(new Event('volumechange'));
+    }
+
+    get paused() {
+      return this._videoId ? this._paused : this._nativeAudio.paused;
+    }
+
+    get ended() {
+      return this._videoId ? this._ended : this._nativeAudio.ended;
+    }
+
+    get buffered() {
+      const d = this.duration || 0;
+      return {
+        length: 1,
+        start: () => 0,
+        end: () => d,
+      };
+    }
+
+    get preload() {
+      return this._preload;
+    }
+
+    set preload(val) {
+      this._preload = val;
+      this._nativeAudio.preload = val;
+    }
+
+    get playbackRate() {
+      return this._playbackRate;
+    }
+
+    set playbackRate(val) {
+      this._playbackRate = val;
+      if (this._videoId && this._playerReady && this._ytPlayer && typeof this._ytPlayer.setPlaybackRate === 'function') {
+        this._ytPlayer.setPlaybackRate(val);
+      }
+      this._nativeAudio.playbackRate = val;
+    }
+  }
+
+  // Hook prototype for on<event> properties
+  const eventNames = ['timeupdate', 'progress', 'waiting', 'canplay', 'playing', 'pause', 'ended', 'error', 'volumechange', 'durationchange', 'seeking', 'seeked'];
+  for (const name of eventNames) {
+    Object.defineProperty(AudioBridge.prototype, 'on' + name, {
+      get() { return this['_on' + name] || null; },
+      set(fn) {
+        if (this['_on' + name]) this.removeEventListener(name, this['_on' + name]);
+        this['_on' + name] = typeof fn === 'function' ? fn : null;
+        if (this['_on' + name]) this.addEventListener(name, this['_on' + name]);
+      }
+    });
+  }
+
+  // Replace standard Audio constructor
+  window.Audio = function (src) {
+    return new AudioBridge(src);
+  };
+  window.Audio.prototype = AudioBridge.prototype;
+
+  const origCreateElement = document.createElement.bind(document);
+  document.createElement = function (tagName, options) {
+    if (typeof tagName === 'string' && tagName.toLowerCase() === 'audio') {
+      return new AudioBridge();
+    }
+    return origCreateElement(tagName, options);
+  };
+
   // Event dispatchers for auth & sync
   const authListeners = new Set();
   const syncListeners = new Set();
