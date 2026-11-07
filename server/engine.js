@@ -116,11 +116,10 @@ function ensureReady() {
     initPromise = new Promise((resolve) => {
       try {
         require('./bytune-engine-bundle.js');
-        // Give 500ms for whenReady promises to execute
-        setTimeout(() => {
+        setImmediate(() => {
           initReady = true;
           resolve();
-        }, 800);
+        });
       } catch (err) {
         console.error('[bytune-engine] bundle load error:', err);
         resolve();

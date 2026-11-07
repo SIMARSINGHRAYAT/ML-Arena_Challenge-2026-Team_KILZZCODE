@@ -69892,38 +69892,15 @@ async function withRetry(fn, attempts = 2, delayMs = 600) {
 }
 async function createSession() {
   const market = resolveDeviceMarket();
-  const bootstrap = await Innertube.create({
-    retrieve_player: false,
-    enable_session_cache: false,
-    location: market.country,
-    lang: displayLanguage()
-  });
-  const visitorData = bootstrap?.session?.context?.client?.visitorData;
-  let poToken;
-  if (visitorData) {
-    try {
-      poToken = await Promise.race([getPoToken(visitorData), new Promise((_, reject) => setTimeout(() => reject(new Error("po-token timeout")), 2500))]);
-      console.log("[bytune] PO token ready");
-    } catch (err2) {
-      console.warn(
-        "[bytune] PO token minting failed, continuing without:",
-        err2 instanceof Error ? err2.message : err2
-      );
-    }
-  }
   const yt = await Innertube.create({
     retrieve_player: true,
     enable_session_cache: false,
-    visitor_data: visitorData,
-    po_token: poToken,
     location: market.country,
     lang: displayLanguage()
   });
-  yt.__visitorData = visitorData;
-  yt.__poToken = poToken;
   yt.__market = market.country;
   console.log(
-    `[bytune] innertube session: gl=${yt.session?.context?.client?.gl ?? "?"} hl=${yt.session?.context?.client?.hl ?? "?"}`
+    `[bytune] fast innertube session ready: gl=${yt.session?.context?.client?.gl ?? "?"} hl=${yt.session?.context?.client?.hl ?? "?"}`
   );
   return yt;
 }
