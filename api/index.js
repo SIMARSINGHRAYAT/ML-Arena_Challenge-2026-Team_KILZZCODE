@@ -54,11 +54,12 @@ module.exports = async function handler(req, res) {
 
     if (pathname === '/api/debug/stream') {
       const id = url.searchParams.get('id') || 'BSTsnWoslP4';
+      const requestedClient = url.searchParams.get('client');
       const ytBundle = require('../server/bytune-engine-bundle');
       const yt = await ytBundle.getYT?.();
       const results = {};
-      const clients = ["ANDROID", "IOS", "VISIONOS", "WEB", "YTMUSIC", "TV"];
-      for (const c of clients) {
+      const clients = requestedClient ? [requestedClient.toUpperCase()] : ["ANDROID", "IOS", "TV", "WEB"];
+      await Promise.all(clients.map(async (c) => {
         try {
           const info = await yt.getBasicInfo(id, { client: c });
           const sd = info?.streaming_data;
@@ -74,7 +75,7 @@ module.exports = async function handler(req, res) {
         } catch (e) {
           results[c] = { error: e.message };
         }
-      }
+      }));
       return sendJson(results);
     }
 
