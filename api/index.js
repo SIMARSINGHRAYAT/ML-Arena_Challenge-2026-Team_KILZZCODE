@@ -52,6 +52,29 @@ module.exports = async function handler(req, res) {
       return sendJson({ status: 'ok', name: 'ByTune Web API', version: '1.0.1' });
     }
 
+    if (pathname === '/api/debug/stream') {
+      const id = url.searchParams.get('id') || 'BSTsnWoslP4';
+      const yt = await require('../server/bytune-engine-bundle').getYT?.() || null;
+      // In bytune-engine-bundle, let's test getBasicInfo on all clients
+      const results = {};
+      const clients = ["ANDROID", "IOS", "VISIONOS", "WEB", "YTMUSIC", "TV"];
+      for (const c of clients) {
+        try {
+          const info = await yt.getBasicInfo(id, { client: c });
+          const sd = info?.streaming_data;
+          results[c] = {
+            status: info?.playability_status?.status,
+            reason: info?.playability_status?.reason,
+            formats: (sd?.adaptive_formats || []).length,
+            hasAudio: (sd?.adaptive_formats || []).some(f => f.has_audio),
+          };
+        } catch (e) {
+          results[c] = { error: e.message };
+        }
+      }
+      return sendJson(results);
+    }
+
     if (pathname === '/api/music/home') {
       const data = await engine.getHome();
       return sendJson(data);

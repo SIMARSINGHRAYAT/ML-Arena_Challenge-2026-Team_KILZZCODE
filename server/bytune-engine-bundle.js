@@ -82620,3 +82620,5 @@ content-type/dist/index.js:
    * MIT Licensed
    *)
 */
+
+module.exports.getYT = getYT;
