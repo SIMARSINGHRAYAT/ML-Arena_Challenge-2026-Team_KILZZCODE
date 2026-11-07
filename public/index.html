@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; media-src * blob: data: https: http:; img-src * data: blob: https:; font-src * data:; connect-src *;"
+    />
+    <title>ByTune — Web Music Player</title>
+    <style>
+      /* Ensure clicks, selections, and drag-and-drop behave natively in standard web browsers */
+      * {
+        -webkit-app-region: no-drag !important;
+        app-region: no-drag !important;
+      }
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #0a0a0a;
+        color: #ffffff;
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+    <!-- ByTune Web Bridge to provide window.bytune to the client -->
+    <script src="/bytune-web-bridge.js"></script>
+    <script type="module" crossorigin src="/assets/index-Bz9PNNZf.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Dp1bqAU4.css">
+  </head>
+  <body style="background:#0a0a0a">
+    <div id="root"></div>
+  </body>
+</html>
+

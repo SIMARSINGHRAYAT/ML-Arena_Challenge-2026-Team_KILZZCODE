@@ -1,0 +1,19 @@
+{
+  "name": "bytune-web",
+  "version": "1.0.1",
+  "description": "ByTune — Web Music Player (Vercel Deployment Ready)",
+  "private": true,
+  "main": "server/dev-server.js",
+  "scripts": {
+    "start": "node server/dev-server.js",
+    "dev": "node server/dev-server.js",
+    "build": "echo 'Build ready for Vercel'"
+  },
+  "dependencies": {
+    "jsdom": "^26.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+
