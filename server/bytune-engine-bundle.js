@@ -69902,7 +69902,7 @@ async function createSession() {
   let poToken;
   if (visitorData) {
     try {
-      poToken = await getPoToken(visitorData);
+      poToken = await Promise.race([getPoToken(visitorData), new Promise((_, reject) => setTimeout(() => reject(new Error("po-token timeout")), 2500))]);
       console.log("[bytune] PO token ready");
     } catch (err2) {
       console.warn(
@@ -70535,7 +70535,7 @@ function resolveStream(videoId, forceRotate = false, maxKbps, mp4Only = false) {
           );
           const picked = await pickAudio(info2, yt, maxKbps, mp4Only);
           if (!picked) throw new Error(`no audio format for client ${client2}`);
-          if (!await probeUrl(picked.url)) throw new Error(`stream rejected for client ${client2}`);
+          if (!picked.url || typeof picked.url !== "string") throw new Error(`no valid audio url for client ${client2}`);
           preferredClientIdx = idx;
           const value = { url: picked.url, mime: picked.mime, lufs: picked.lufs };
           resolveCache.set(key, { value, ts: Date.now() });
@@ -81926,7 +81926,7 @@ function fetchUpstream(streamUrl, range) {
 async function handle(req, res) {
   try {
     const url = new URL(req.url ?? "/", "http://127.0.0.1");
-    const trackId2 = url.searchParams.get("id");
+    const trackId2 = url.searchParams.get("id") || (req.query && req.query.id);
     const localId = url.searchParams.get("lid");
     if (!trackId2 && !localId) {
       res.writeHead(400);
@@ -81965,8 +81965,12 @@ async function handle(req, res) {
       upstream = await fetchUpstream(stream.url, range);
     }
     if (!upstream.ok || !upstream.body) {
-      console.warn(`[bytune] proxy upstream HTTP ${upstream.status} for ${trackId2}`);
-      res.writeHead(upstream.status === 403 ? 404 : upstream.status);
+      console.warn(`[bytune] proxy upstream HTTP ${upstream.status} for ${trackId2}, redirecting browser directly to stream URL`);
+      res.writeHead(302, {
+        "Location": stream.url,
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-store"
+      });
       res.end();
       return;
     }

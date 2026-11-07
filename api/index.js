@@ -37,6 +37,7 @@ module.exports = async function handler(req, res) {
   try {
     // Audio streaming handler (handles HTTP Range and proxying audio)
     if (pathname === '/api/music/stream' || pathname.endsWith('/stream')) {
+      req.query = req.query || Object.fromEntries(url.searchParams.entries());
       return await engine.handleStream(req, res);
     }
 
@@ -70,27 +71,27 @@ module.exports = async function handler(req, res) {
       const query = url.searchParams.get('query') || '';
       const light = url.searchParams.get('light') === 'true';
       const data = await engine.search(query, light);
-      return sendJson(data);
+      return sendJson(data || { songs: [], artists: [], albums: [], playlists: [] });
     }
 
     if (pathname === '/api/music/searchPage') {
       const query = url.searchParams.get('query') || '';
       const filter = url.searchParams.get('filter') || void 0;
       const data = await engine.searchPage(query, filter);
-      return sendJson(data);
+      return sendJson(data || { rows: [] });
     }
 
     if (pathname === '/api/music/searchMore') {
       const token = url.searchParams.get('token') || '';
       const filter = url.searchParams.get('filter') || void 0;
       const data = await engine.searchMore(token, filter);
-      return sendJson(data);
+      return sendJson(data || { rows: [] });
     }
 
     if (pathname === '/api/music/suggestions') {
       const query = url.searchParams.get('query') || '';
       const data = await engine.suggestions(query);
-      return sendJson(data);
+      return sendJson(data || { items: [] });
     }
 
     if (pathname === '/api/music/artist') {
