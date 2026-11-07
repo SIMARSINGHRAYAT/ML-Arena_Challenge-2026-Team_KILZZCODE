@@ -81928,60 +81928,36 @@ async function handle(req, res) {
         });
         res.end(JSON.stringify({ lufs: meta2.lufs }));
       } catch (err2) {
-        console.warn("[bytune] proxy meta error:", err2 instanceof Error ? err2.message : err2);
-        res.writeHead(502, { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" });
+        res.writeHead(200, { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" });
         res.end(JSON.stringify({ lufs: null }));
       }
       return;
     }
-    let stream = await resolveStream(trackId2, forceRotate, maxKbps);
-    let upstream = await fetchUpstream(stream.url, range);
-    if (upstream.status === 403 && trackId2) {
-      console.warn(`[bytune] proxy upstream 403 for ${trackId2}, rotating client`);
-      stream = await resolveStream(trackId2, true, maxKbps);
-      upstream = await fetchUpstream(stream.url, range);
-    }
-    if (!upstream.ok || !upstream.body) {
-      console.warn(`[bytune] proxy upstream HTTP ${upstream.status} for ${trackId2}, redirecting browser directly to stream URL`);
-      res.writeHead(302, {
-        "Location": stream.url,
-        "Access-Control-Allow-Origin": "*",
-        "Cache-Control": "no-store"
-      });
-      res.end();
+
+    const stream = await resolveStream(trackId2, forceRotate, maxKbps);
+    if (!stream || !stream.url) {
+      res.writeHead(404);
+      res.end("audio stream not found");
       return;
     }
-    const outHeaders = {
+
+    // Direct 302 redirect: finishes serverless function in <500ms, avoids Vercel 10s timeout,
+    // and streams audio smoothly directly to browser!
+    res.writeHead(302, {
+      "Location": stream.url,
       "Access-Control-Allow-Origin": "*",
-      "Cache-Control": "no-store"
-    };
-    for (const h of PASSTHROUGH_HEADERS) {
-      const v = upstream.headers.get(h);
-      if (v) outHeaders[h] = v;
-    }
-    res.writeHead(upstream.status, outHeaders);
-    const reader = upstream.body.getReader();
-    req.on("close", () => {
-      void reader.cancel().catch(() => void 0);
+      "Cache-Control": "public, max-age=3600"
     });
-    for (; ; ) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value && value.length > 0 && !res.write(value)) {
-        await new Promise((resolve5) => res.once("drain", () => resolve5()));
-      }
-    }
     res.end();
   } catch (err2) {
-    console.warn("[bytune] proxy error:", err2 instanceof Error ? err2.message : err2);
+    console.warn("[bytune] stream resolve error:", err2 instanceof Error ? err2.message : err2);
     try {
-      res.writeHead(502);
-      res.end("proxy error");
+      res.writeHead(500, { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err2?.message }));
     } catch {
     }
   }
 }
-
 // electron/mac-menu.ts
 var REPEAT_LABEL = {
   off: "Repeat Off",
